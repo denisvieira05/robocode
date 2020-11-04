@@ -21,45 +21,33 @@ public class DenisVieira extends AdvancedRobot {
 		turnRadarRightRadians(Double.POSITIVE_INFINITY);//keep turning radar right
 	}
 	
-	/**
-	 * onScannedRobot: What to do when you see another robot
-	 */
-	//Sempre que encontrado um robo atire
 	public void onScannedRobot(ScannedRobotEvent scanEvent) { 
-
-        double absBearing = scanEvent.getBearingRadians()+getHeadingRadians();//enemies absolute bearing
-        double latVel = scanEvent.getVelocity() * Math.sin(scanEvent.getHeadingRadians() - absBearing);//enemies later velocity
-        double gunTurnAmt;//amount to turn our gun
-		
 		Enemy enemy = new Enemy(scanEvent, moveDirection);
 		
-		travarORadar();
-		deixarMaisLento();		
+		lockTheRadar();
+		slowerRobot();		
 
-		if(estaPertoOSuficiente(scanEvent)) {
+		if(isCloseEnough(scanEvent)) {
 			enemy.tryKill();
 		} else {
 			enemy.findEnemies();
 		}
 	}
 	
-	private boolean estaPertoOSuficiente(ScannedRobotEvent scanEvent) {
+	private boolean isCloseEnough(ScannedRobotEvent scanEvent) {
 		return scanEvent.getDistance() <= 150;
 	}	
 	
-	private void travarORadar() {
+	private void lockTheRadar() {
         setTurnRadarLeftRadians(getRadarTurnRemainingRadians());
 	}
 	
-	private void deixarMaisLento() {			
+	private void slowerRobot() {			
         if(Math.random()>.9){
             setMaxVelocity((12*Math.random())+12);//randomly change speed
         }
 	}
-	
-	/**
-	 * onHitWall: What to do when you hit a wall
-	 */
+
 	public void onHitWall(HitWallEvent e) {
         moveDirection=-moveDirection;//reverse direction upon hitting a wall
 	}	
@@ -75,7 +63,6 @@ public class DenisVieira extends AdvancedRobot {
     }
 	
 	private void setupRobotColors() {
-		// Definindo as cores do robô
 		setColors(Color.black, Color.red, Color.green); // body, gun, radar
 		setScanColor(Color.green);
 		setBulletColor(Color.yellow);
@@ -97,19 +84,19 @@ public class DenisVieira extends AdvancedRobot {
 	
 		public void tryKill() {
 			turnGun(15);			
-			virePerpendicularAoInimigo();
+			turnPerpendicularlyToTheEnemy();
 			goToTheEnemy();
             setFire(3); 
 		}
 		
 		public void findEnemies() {
 			turnGun(22);		
-			procurarInimigos();
+			searchEnemies();
 			goToTheEnemy();
             setFire(3);
 		}
 		
-		private void procurarInimigos() {	
+		private void searchEnemies() {	
 			setTurnRightRadians(robocode.util.Utils.normalRelativeAngle(absBearing-getHeadingRadians()+latVel/getVelocity()));// dirigir para a localização futura prevista pelos inimigos
 			
 		}
@@ -118,7 +105,7 @@ public class DenisVieira extends AdvancedRobot {
     		setAhead((this.scanEvent.getDistance() - 140) * currentMoveDirection);//move forward		
 		}
 		
-		private void virePerpendicularAoInimigo() {
+		private void turnPerpendicularlyToTheEnemy() {
 	        setTurnLeft(-90-this.scanEvent.getBearing()); //turn perpendicular to the enemy
 		}
 		
